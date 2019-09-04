@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bw.mapper.MyDao">
+	<select id="findAll" resultType="com.bw.entity.Dianying" parameterType="map">
+		select d.*,GROUP_CONCAT(t.tname) 'tname',t.tid from dianying d,dept t,dianying_dept dd where d.did=dd.did and t.tid=dd.tid 
+
+		<if test="dname!=null and dname !=''">
+			and d.dname like concat("%",#{dname},"%")
+		</if>
+		GROUP BY d.dname
+	</select>
+	 <select id="findByDept" resultType="com.bw.entity.Dept">
+	 	select * from dept
+	 </select>
+	 <insert id="add" parameterType="com.bw.entity.Dianying">
+	 	insert into dianying(dname,`desc`,daoyan,startdate) values(#{dname},#{desc},#{daoyan},#{startdate})
+	 	<selectKey order="AFTER" keyProperty="did" resultType="int">
+	 		select last_insert_id() as did
+	 	</selectKey>
+	 </insert>
+	
+	<insert id="adddianying_dept" parameterType="map">
+		insert into dianying_dept(did,tid) values(#{did},#{tid})
+	</insert>
+	<select id="findBydid" parameterType="int" resultType="com.bw.entity.Dianying">
+		select d.*,GROUP_CONCAT(t.tname) 'tname',t.tid from dianying d,dept t,dianying_dept dd where d.did=dd.did and t.tid=dd.tid and d.did=#{0} GROUP BY d.dname
+	</select>
+	<update id="update" parameterType="com.bw.entity.Dianying">
+		update dianying set dname=#{dname},`desc`=#{desc},daoyan=#{daoyan},startdate=#{startdate} where did=#{did}
+	</update>
+	<delete id="plsc" parameterType="string">
+		delete from dianying where did in (${_parameter})
+	</delete>
+	<delete id="del" parameterType="string">
+		delete from dianying_dept where did in (${_parameter})
+	</delete>
+</mapper>
